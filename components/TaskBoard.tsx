@@ -53,14 +53,6 @@ export default function TaskBoard() {
     loadEntries();
   }, [activeDate]);
 
-  // When a name is picked, default the role dropdown to that person's
-  // usual role — but the person can still change it.
-  useEffect(() => {
-    if (selectedMember) {
-      setSelectedRoleId(selectedMember.role_id);
-    }
-  }, [selectedMemberId]);
-
   async function toggleTask(task: Task) {
     if (!selectedMember) return;
     const existing = entries.find((e) => e.task_id === task.id);
