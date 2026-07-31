@@ -8,6 +8,9 @@ import {
   Task,
   ChecklistEntry,
   ServiceDay,
+  Phase,
+  PHASE_ORDER,
+  phaseLabel,
   getDayFromDate,
   getTodayISO,
   formatDateLabel,
@@ -71,8 +74,15 @@ export default function TaskBoard() {
   }
 
   const tasksForSelectedRole = tasks.filter(
-    (t) => t.role_id === selectedRoleId
+    (t) =>
+      t.role_id === selectedRoleId &&
+      (day ? t.applicable_days.includes(day) : false)
   );
+
+  const tasksByPhase = PHASE_ORDER.map((phase) => ({
+    phase,
+    tasks: tasksForSelectedRole.filter((t) => t.phase === phase),
+  })).filter((group) => group.tasks.length > 0);
 
   const changedTasks = tasksForSelectedRole.filter((t) => {
     const saved = entries.find((e) => e.task_id === t.id)?.checked ?? false;
@@ -120,7 +130,11 @@ export default function TaskBoard() {
   }
 
   const roleCompletion = roles.map((role) => {
-    const roleTasks = tasks.filter((t) => t.role_id === role.id);
+    const roleTasks = tasks.filter(
+      (t) =>
+        t.role_id === role.id &&
+        (day ? t.applicable_days.includes(day) : false)
+    );
     const done = roleTasks.filter((t) =>
       entries.find((e) => e.task_id === t.id && e.checked)
     ).length;
@@ -229,47 +243,58 @@ export default function TaskBoard() {
               </div>
               {tasksForSelectedRole.length === 0 && (
                 <div className="px-5 py-6 text-textMuted text-sm">
-                  No tasks assigned to this role yet.
+                  No tasks assigned to this role for {dayLabel(day)}.
                 </div>
               )}
-              {tasksForSelectedRole.map((task) => {
-                const savedEntry = entries.find((e) => e.task_id === task.id);
-                const savedChecked = savedEntry?.checked ?? false;
-                const pendingChecked = !!workingChecks[task.id];
-                const isDirty = savedChecked !== pendingChecked;
-                return (
-                  <button
-                    key={task.id}
-                    onClick={() => toggleTask(task)}
-                    className="rundown-row w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-panelLight transition-colors"
-                  >
-                    <span
-                      className="cue-light"
-                      data-checked={pendingChecked && !isDirty}
-                      data-pending={isDirty}
-                    />
-                    <span
-                      className={`flex-1 ${
-                        pendingChecked
-                          ? "text-textMuted line-through"
-                          : "text-textPrimary"
-                      }`}
-                    >
-                      {task.description}
+              {tasksByPhase.map(({ phase, tasks: phaseTasks }) => (
+                <div key={phase}>
+                  <div className="px-5 py-2 bg-panelLight/50 border-b border-hairline">
+                    <span className="font-mono text-[11px] text-gold uppercase tracking-widest">
+                      {phaseLabel(phase)}
                     </span>
-                    {isDirty && (
-                      <span className="font-mono text-[11px] text-gold shrink-0">
-                        not saved
-                      </span>
-                    )}
-                    {!isDirty && savedChecked && savedEntry?.checked_by && (
-                      <span className="font-mono text-[11px] text-live shrink-0">
-                        ✓ {savedEntry.checked_by}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
+                  </div>
+                  {phaseTasks.map((task) => {
+                    const savedEntry = entries.find(
+                      (e) => e.task_id === task.id
+                    );
+                    const savedChecked = savedEntry?.checked ?? false;
+                    const pendingChecked = !!workingChecks[task.id];
+                    const isDirty = savedChecked !== pendingChecked;
+                    return (
+                      <button
+                        key={task.id}
+                        onClick={() => toggleTask(task)}
+                        className="rundown-row w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-panelLight transition-colors"
+                      >
+                        <span
+                          className="cue-light"
+                          data-checked={pendingChecked && !isDirty}
+                          data-pending={isDirty}
+                        />
+                        <span
+                          className={`flex-1 ${
+                            pendingChecked
+                              ? "text-textMuted line-through"
+                              : "text-textPrimary"
+                          }`}
+                        >
+                          {task.description}
+                        </span>
+                        {isDirty && (
+                          <span className="font-mono text-[11px] text-gold shrink-0">
+                            not saved
+                          </span>
+                        )}
+                        {!isDirty && savedChecked && savedEntry?.checked_by && (
+                          <span className="font-mono text-[11px] text-live shrink-0">
+                            ✓ {savedEntry.checked_by}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              ))}
 
               {/* Submit bar */}
               <div className="px-5 py-4 border-t border-hairline flex items-center justify-between gap-4">
