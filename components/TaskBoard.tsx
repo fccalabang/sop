@@ -22,6 +22,7 @@ export default function TaskBoard() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [entries, setEntries] = useState<ChecklistEntry[]>([]);
   const [selectedMemberId, setSelectedMemberId] = useState<string>("");
+  const [selectedRoleId, setSelectedRoleId] = useState<string>("");
   const [loading, setLoading] = useState(true);
 
   const selectedMember = members.find((m) => m.id === selectedMemberId);
@@ -52,6 +53,14 @@ export default function TaskBoard() {
     loadEntries();
   }, [activeDate]);
 
+  // When a name is picked, default the role dropdown to that person's
+  // usual role — but the person can still change it.
+  useEffect(() => {
+    if (selectedMember) {
+      setSelectedRoleId(selectedMember.role_id);
+    }
+  }, [selectedMemberId]);
+
   async function toggleTask(task: Task) {
     if (!selectedMember) return;
     const existing = entries.find((e) => e.task_id === task.id);
@@ -81,7 +90,7 @@ export default function TaskBoard() {
   }
 
   const tasksForSelectedRole = tasks.filter(
-    (t) => t.role_id === selectedMember?.role_id
+    (t) => t.role_id === selectedRoleId
   );
 
   const roleCompletion = roles.map((role) => {
@@ -142,34 +151,51 @@ export default function TaskBoard() {
         })}
       </div>
 
-      {/* Name picker */}
-      <div className="mb-6">
-        <label className="block font-mono text-xs text-textMuted uppercase tracking-wide mb-2">
-          Who's checking in?
-        </label>
-        <select
-          value={selectedMemberId}
-          onChange={(e) => setSelectedMemberId(e.target.value)}
-          className="w-full bg-panel border border-hairline rounded-lg px-4 py-3 text-textPrimary font-body focus:border-gold outline-none"
-        >
-          <option value="">Select your name…</option>
-          {members.map((m) => {
-            const role = roles.find((r) => r.id === m.role_id);
-            return (
+      {/* Name + Role pickers */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+        <div>
+          <label className="block font-mono text-xs text-textMuted uppercase tracking-wide mb-2">
+            Who's checking in?
+          </label>
+          <select
+            value={selectedMemberId}
+            onChange={(e) => setSelectedMemberId(e.target.value)}
+            className="w-full bg-panel border border-hairline rounded-lg px-4 py-3 text-textPrimary font-body focus:border-gold outline-none"
+          >
+            <option value="">Select your name…</option>
+            {members.map((m) => (
               <option key={m.id} value={m.id}>
-                {m.name} — {role?.name ?? "Unassigned"}
+                {m.name}
               </option>
-            );
-          })}
-        </select>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block font-mono text-xs text-textMuted uppercase tracking-wide mb-2">
+            Role for this weekend
+          </label>
+          <select
+            value={selectedRoleId}
+            onChange={(e) => setSelectedRoleId(e.target.value)}
+            className="w-full bg-panel border border-hairline rounded-lg px-4 py-3 text-textPrimary font-body focus:border-gold outline-none"
+          >
+            <option value="">Select a role…</option>
+            {roles.map((r) => (
+              <option key={r.id} value={r.id}>
+                {r.name}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
-      {/* Task rundown for selected member */}
-      {selectedMember ? (
+      {/* Task rundown for selected role */}
+      {selectedMember && selectedRoleId ? (
         <div className="bg-panel border border-hairline rounded-xl overflow-hidden mb-8">
           <div className="px-5 py-3 border-b border-hairline flex items-center justify-between">
             <span className="font-display font-medium">
-              {roles.find((r) => r.id === selectedMember.role_id)?.name}
+              {roles.find((r) => r.id === selectedRoleId)?.name}
             </span>
             <span className="font-mono text-xs text-textMuted">
               {tasksForSelectedRole.filter((t) =>
@@ -211,7 +237,7 @@ export default function TaskBoard() {
         </div>
       ) : (
         <div className="bg-panel border border-hairline rounded-xl px-5 py-6 text-textMuted text-sm mb-8">
-          Select your name above to see your task list for{" "}
+          Select your name and a role above to see the task list for{" "}
           {day === "SAT" ? "Saturday" : "Sunday"}.
         </div>
       )}
