@@ -17,7 +17,7 @@ export type Task = {
   sort_order: number;
 };
 
-export type ServiceDay = "SAT" | "SUN";
+export type ServiceDay = "WED" | "SAT" | "SUN";
 
 export type ChecklistEntry = {
   id: string;
@@ -29,11 +29,34 @@ export type ChecklistEntry = {
   checked_at: string | null;
 };
 
-/** Returns the upcoming (or current) Saturday and Sunday as ISO date strings. */
-export function getCurrentWeekend(): { sat: string; sun: string } {
+export function dayLabel(day: ServiceDay): string {
+  if (day === "WED") return "Wednesday";
+  if (day === "SAT") return "Saturday";
+  return "Sunday";
+}
+
+/** Returns WED/SAT/SUN if the given ISO date falls on one of those days, else null. */
+export function getDayFromDate(iso: string): ServiceDay | null {
+  const d = new Date(iso + "T00:00:00");
+  const dow = d.getDay();
+  if (dow === 3) return "WED";
+  if (dow === 6) return "SAT";
+  if (dow === 0) return "SUN";
+  return null;
+}
+
+/** Returns the upcoming (or current) Wednesday, Saturday, and Sunday as ISO date strings. */
+export function getCurrentWeek(): { wed: string; sat: string; sun: string } {
   const now = new Date();
   const day = now.getDay(); // 0 = Sun, 6 = Sat
-  const toISODate = (d: Date) => d.toISOString().slice(0, 10);
+  // Use local date components, not toISOString() (which converts to UTC and
+  // can roll the date back by one in timezones ahead of UTC, e.g. UTC+8).
+  const toISODate = (d: Date) => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  };
 
   let satOffset: number;
   if (day === 6) satOffset = 0; // today is Saturday
@@ -45,7 +68,16 @@ export function getCurrentWeekend(): { sat: string; sun: string } {
   const sun = new Date(sat);
   sun.setDate(sat.getDate() + 1);
 
-  return { sat: toISODate(sat), sun: toISODate(sun) };
+  // Nearest Wednesday: today if today is Wednesday, otherwise the next one.
+  const wedOffset = (3 - day + 7) % 7;
+  const wed = new Date(now);
+  wed.setDate(now.getDate() + wedOffset);
+
+  return {
+    wed: toISODate(wed),
+    sat: toISODate(sat),
+    sun: toISODate(sun),
+  };
 }
 
 export function formatDateLabel(iso: string): string {
