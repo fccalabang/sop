@@ -10,11 +10,23 @@ export type Member = {
   role_id: string;
 };
 
+export type Phase = "BEFORE" | "DURING" | "AFTER";
+
+export const PHASE_ORDER: Phase[] = ["BEFORE", "DURING", "AFTER"];
+
+export function phaseLabel(phase: Phase): string {
+  if (phase === "BEFORE") return "Before the Service";
+  if (phase === "DURING") return "During the Service";
+  return "After the Service";
+}
+
 export type Task = {
   id: string;
   role_id: string;
   description: string;
   sort_order: number;
+  phase: Phase;
+  applicable_days: ServiceDay[];
 };
 
 export type ServiceDay = "WED" | "SAT" | "SUN";
