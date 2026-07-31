@@ -7,6 +7,8 @@ import {
   Task,
   ChecklistEntry,
   ServiceDay,
+  PHASE_ORDER,
+  phaseLabel,
   formatDateLabel,
   dayLabel,
 } from "@/lib/types";
@@ -128,8 +130,16 @@ export default function HistoryView() {
             {dayLabel(selectedGroup.day as ServiceDay)}
           </h2>
           {roles.map((role) => {
-            const roleTasks = tasks.filter((t) => t.role_id === role.id);
+            const roleTasks = tasks.filter(
+              (t) =>
+                t.role_id === role.id &&
+                t.applicable_days.includes(selectedGroup.day as ServiceDay)
+            );
             if (roleTasks.length === 0) return null;
+            const tasksByPhase = PHASE_ORDER.map((phase) => ({
+              phase,
+              tasks: roleTasks.filter((t) => t.phase === phase),
+            })).filter((group) => group.tasks.length > 0);
             return (
               <div
                 key={role.id}
@@ -138,32 +148,41 @@ export default function HistoryView() {
                 <div className="px-5 py-3 border-b border-hairline font-display font-medium">
                   {role.name}
                 </div>
-                {roleTasks.map((task) => {
-                  const entry = selectedGroup.entries.find(
-                    (e) => e.task_id === task.id
-                  );
-                  const checked = !!entry?.checked;
-                  return (
-                    <div
-                      key={task.id}
-                      className="rundown-row flex items-center gap-3 px-5 py-3"
-                    >
-                      <span className="cue-light" data-checked={checked} />
-                      <span
-                        className={`flex-1 text-sm ${
-                          checked ? "text-textMuted" : "text-textPrimary"
-                        }`}
-                      >
-                        {task.description}
+                {tasksByPhase.map(({ phase, tasks: phaseTasks }) => (
+                  <div key={phase}>
+                    <div className="px-5 py-2 bg-panelLight/50 border-b border-hairline">
+                      <span className="font-mono text-[11px] text-gold uppercase tracking-widest">
+                        {phaseLabel(phase)}
                       </span>
-                      {checked && entry?.checked_by && (
-                        <span className="font-mono text-[11px] text-live shrink-0">
-                          ✓ {entry.checked_by}
-                        </span>
-                      )}
                     </div>
-                  );
-                })}
+                    {phaseTasks.map((task) => {
+                      const entry = selectedGroup.entries.find(
+                        (e) => e.task_id === task.id
+                      );
+                      const checked = !!entry?.checked;
+                      return (
+                        <div
+                          key={task.id}
+                          className="rundown-row flex items-center gap-3 px-5 py-3"
+                        >
+                          <span className="cue-light" data-checked={checked} />
+                          <span
+                            className={`flex-1 text-sm ${
+                              checked ? "text-textMuted" : "text-textPrimary"
+                            }`}
+                          >
+                            {task.description}
+                          </span>
+                          {checked && entry?.checked_by && (
+                            <span className="font-mono text-[11px] text-live shrink-0">
+                              ✓ {entry.checked_by}
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ))}
               </div>
             );
           })}
