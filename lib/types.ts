@@ -88,3 +88,12 @@ export function formatDateLabel(iso: string): string {
     year: "numeric",
   });
 }
+
+/** Returns today's date as an ISO string using local date components (avoids UTC rollback). */
+export function getTodayISO(): string {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  const d = String(now.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
