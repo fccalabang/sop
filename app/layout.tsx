@@ -21,8 +21,8 @@ const mono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Media Team Rundown",
-  description: "Weekend service task checklist for the media team",
+  title: "FCCA Team Rundown",
+  description: "Service task checklist for the media team",
 };
 
 export default function RootLayout({
