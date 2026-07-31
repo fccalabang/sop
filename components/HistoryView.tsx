@@ -2,7 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { Role, Task, ChecklistEntry, formatDateLabel } from "@/lib/types";
+import {
+  Role,
+  Task,
+  ChecklistEntry,
+  ServiceDay,
+  formatDateLabel,
+  dayLabel,
+} from "@/lib/types";
 
 type DateGroup = {
   date: string;
@@ -67,7 +74,7 @@ export default function HistoryView() {
           Archive
         </div>
         <h1 className="font-display font-bold text-3xl sm:text-4xl leading-tight">
-          Past Weekends
+          Past Services
         </h1>
         <p className="text-textMuted text-sm mt-1">
           Completion history, oldest checks preserved for the record.
@@ -96,7 +103,7 @@ export default function HistoryView() {
                     {formatDateLabel(g.date)}
                   </span>
                   <span className="font-mono text-xs text-textMuted ml-2 uppercase">
-                    {g.day === "SAT" ? "Saturday" : "Sunday"}
+                    {dayLabel(g.day as ServiceDay)}
                   </span>
                 </span>
                 <span className="font-mono text-xs text-textMuted">
@@ -114,11 +121,11 @@ export default function HistoryView() {
             onClick={() => setSelectedDate(null)}
             className="font-mono text-xs text-gold hover:underline uppercase tracking-wide mb-4"
           >
-            ← All weekends
+            ← All services
           </button>
           <h2 className="font-display font-medium text-xl mb-4">
             {formatDateLabel(selectedGroup.date)} —{" "}
-            {selectedGroup.day === "SAT" ? "Saturday" : "Sunday"}
+            {dayLabel(selectedGroup.day as ServiceDay)}
           </h2>
           {roles.map((role) => {
             const roleTasks = tasks.filter((t) => t.role_id === role.id);
@@ -168,7 +175,7 @@ export default function HistoryView() {
           href="/"
           className="font-mono text-xs text-gold hover:underline uppercase tracking-wide"
         >
-          ← Back to this weekend
+          ← Back to this week
         </a>
       </div>
     </div>
