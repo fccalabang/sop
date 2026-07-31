@@ -28,6 +28,12 @@ body {
   box-shadow: 0 0 8px 1px rgba(76, 175, 125, 0.55);
 }
 
+.cue-light[data-pending="true"] {
+  background: #E8A33D;
+  border-color: #E8A33D;
+  box-shadow: 0 0 8px 1px rgba(232, 163, 61, 0.55);
+}
+
 .rundown-row {
   border-bottom: 1px solid #33383F;
 }
