@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body {
+  background-color: #14161A;
+  color: #F2F0EA;
+}
+
+body {
+  font-feature-settings: "tnum" 1;
+}
+
+/* Cue light: pending = dim amber ring, checked = solid green glow */
+.cue-light {
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  border: 2px solid #8A6A2E;
+  background: transparent;
+  transition: all 150ms ease;
+  flex-shrink: 0;
+}
+
+.cue-light[data-checked="true"] {
+  background: #4CAF7D;
+  border-color: #4CAF7D;
+  box-shadow: 0 0 8px 1px rgba(76, 175, 125, 0.55);
+}
+
+.rundown-row {
+  border-bottom: 1px solid #33383F;
+}
+
+.rundown-row:last-child {
+  border-bottom: none;
+}
+
+/* Visible keyboard focus, kept consistent across interactive elements */
+button:focus-visible,
+select:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid #E8A33D;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0.001ms !important;
+  }
+}
