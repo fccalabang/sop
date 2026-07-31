@@ -8,15 +8,15 @@ import {
   Task,
   ChecklistEntry,
   ServiceDay,
-  getCurrentWeek,
   getDayFromDate,
+  getTodayISO,
   formatDateLabel,
   dayLabel,
 } from "@/lib/types";
 
 export default function TaskBoard() {
-  const { sun } = useMemo(() => getCurrentWeek(), []);
-  const [activeDate, setActiveDate] = useState<string>(sun);
+  const today = useMemo(() => getTodayISO(), []);
+  const [activeDate, setActiveDate] = useState<string>(today);
   const day = getDayFromDate(activeDate);
 
   const [roles, setRoles] = useState<Role[]>([]);
@@ -144,7 +144,7 @@ export default function TaskBoard() {
           On Air Prep
         </div>
         <h1 className="font-display font-bold text-3xl sm:text-4xl leading-tight">
-          Media Team Rundown
+          FCCA Team Rundown
         </h1>
         <p className="text-textMuted text-sm mt-1">
           Service task checklist — Free Christian Church of Alabang
